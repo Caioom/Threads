@@ -21,13 +21,11 @@ public class Futures {
                 })).collect(Collectors.toList());
     }
 
-    public static boolean verificarSeExisteTarefas(List<Future<String>> futureList) {
-        if(futureList.size() == 0) {
-            System.out.println("\nParabens voce acabou todas as tarefas!");
-            return true;
-        }
+    public static boolean verificarSeExiste(List<Future<String>> futuresEmExecucao) {
+        if(futuresEmExecucao.size() == 0)
+            return false;
 
-        return false;
+        return true;
     }
 
     public static void exibirFeito(Future future) throws ExecutionException, InterruptedException {
@@ -36,10 +34,10 @@ public class Futures {
     }
 
 
-    public static void tarefasEmExecucao(List<Future<String>> futures) throws ExecutionException, InterruptedException {
+    public static List<Future<String>> removerRealizadas(List<Future<String>> futures) throws ExecutionException, InterruptedException {
         List<Future<String>> futuresEmExecucao = futures;
         while(true) {
-            if(verificarSeExisteTarefas(futuresEmExecucao)) {
+            if(!verificarSeExiste(futuresEmExecucao)) {
                 break;
             }
 
@@ -50,14 +48,18 @@ public class Futures {
                 }
             }
         }
+
+        return futuresEmExecucao;
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Casa casa = new Casa(new Quarto());
         List<Future<String>> futures = new CopyOnWriteArrayList<>(executarTarefas(casa));
 
-        tarefasEmExecucao(futures);
-        executor.shutdown();
+        if(removerRealizadas(futures).size() == 0) {
+            System.out.println("\nPARABENS VOCE ACABOU TODAS AS TAREFAS");
+            executor.shutdown();
+        };
     }
 }
 
@@ -94,7 +96,8 @@ class Quarto extends Comodo {
         return Arrays.asList(
                 this::arrumarCama,
                 this::arrumarGaveta,
-                this::arrumarMesa
+                this::arrumarMesa,
+                this::arrumarGuardaRoupa
         );
     }
 
@@ -109,5 +112,9 @@ class Quarto extends Comodo {
 
     public String arrumarMesa() {
         return "Arrumar Mesa";
+    }
+
+    public String arrumarGuardaRoupa() {
+        return "Arrumar Guarda Roupa";
     }
 }
